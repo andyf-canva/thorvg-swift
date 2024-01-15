@@ -11,7 +11,9 @@
 [![Build Android](https://github.com/thorvg/thorvg/actions/workflows/build_android.yml/badge.svg?branch=main&event=push)](https://github.com/thorvg/thorvg/actions/workflows/build_android.yml)
 
 
-# ThorVG
+# ThorVG-swift
+> A Swift wrapper on top of the ThorVG C++ API.
+
 <p align="center">
   <img width="800" height="auto" src="https://github.com/thorvg/thorvg/blob/main/res/logo/512/thorvg-banner.png">
 </p>
