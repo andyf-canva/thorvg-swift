@@ -5,6 +5,9 @@ import PackageDescription
 
 let package = Package(
     name: "thorvg-swift",
+    platforms: [
+        .iOS(.v13)
+    ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
@@ -24,6 +27,7 @@ let package = Package(
             name: "thorvg",
             path: "src",
             exclude: [
+                "bindings/capi/tvgCapi.cpp", // TODO: Source of issue regarding duplicate symbols. Is this ok to remove?
                 "examples",
                 "bindings/wasm",
                 "loaders/external_jpg",
@@ -32,8 +36,8 @@ let package = Package(
                 "renderer/gl_engine", // TODO: Do we want a OpenGL engine?
                 "renderer/wg_engine", // TODO: Do we want a WebGPU engine?
                 "tools",
-            ], // TODO: Probably need to exclude some stuff.
-            publicHeadersPath: "inc_c",
+            ], // TODO: Anything else we want to exclude?
+            publicHeadersPath: "bindings/capi",
             cxxSettings: [
                 .headerSearchPath("inc"),
                 .headerSearchPath("common"),
@@ -51,7 +55,14 @@ let package = Package(
                 .headerSearchPath("renderer/gl_engine"),
                 .headerSearchPath("savers/gif"),
             ] // TODO: Also need to check other bits.
-        )
+        ),
+        .testTarget(
+            name: "thorvg-swift-tests",
+            dependencies: ["thorvg-swift"],
+            path: "swift-tests",
+            resources: [.process("Resources")],
+            swiftSettings: [.interoperabilityMode(.Cxx)]
+        ),
     ],
     cxxLanguageStandard: .cxx14
 )
