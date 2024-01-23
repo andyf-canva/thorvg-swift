@@ -6,75 +6,112 @@ import XCTest
 final class LottieTests: XCTestCase {
 
     let testLottieUrl = Bundle.module.url(forResource: "test", withExtension: "json")!
+    let testSize = CGSize(width: 2048, height: 2048)
 
-    func testInit_WithValidJson_ReturnsNumberOfFrames() {
-        let lottie = Lottie(source: testLottieUrl.path)
+    // MARK: Initialiser tests
+
+    func testInit_WithValidPath_ReturnsCorrectNumberOfFrames() throws {
+        let lottie = try Lottie(path: testLottieUrl.path, size: testSize)
 
         XCTAssertEqual(lottie.numberOfFrames, 180)
     }
 
-    func testInit_WithValidJson_ReturnsDuration() {
-        let lottie = Lottie(source: testLottieUrl.path)
+    func testInit_WithValidPath_ReturnsCorrectDuration() throws {
+        let lottie = try Lottie(path: testLottieUrl.path, size: testSize)
 
         XCTAssertEqual(lottie.duration, CMTime(seconds: 3))
     }
 
-    func testInit_WithValidJson_ReturnsSize() {
-        let size = CGSize(width: 2048, height: 2048)
-        let lottie = Lottie(source: testLottieUrl.path)
+    func testInit_WithValidPath_ReturnsCorrectSize() throws {
+        let lottie = try Lottie(path: testLottieUrl.path, size: testSize)
 
-//        XCTAssertEqual(lottie.size.height, 2048)
-//        XCTAssertEqual(lottie.size.width, 2048)
+        XCTAssertEqual(lottie.size.height, 2048)
+        XCTAssertEqual(lottie.size.width, 2048)
     }
 
-    func test_newAPI() {
-        let source = testLottieUrl.path
+    func testInit_WithValidPath_AndCropped_ReturnsCorrectSize() throws {
+        let cropRect = CGRect(x: 0, y: 0, width: 1024, height: 1024)
+        let lottie = try Lottie(path: testLottieUrl.path, size: testSize, crop: cropRect)
 
+        XCTAssertEqual(lottie.size.height, 2048)
+        XCTAssertEqual(lottie.size.width, 2048)
+    }
 
-        let size = CGSize(width: 2048, height: 2048)
-        let stride = size.width
-        var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
+    func testInit_WithInvalidPath_ThrowsError() {
+        do {
+            _ = try Lottie(path: "", size: testSize)
 
-        let lottie = Lottie(source: source)
-
-        let crop = CGRect(x: 1024, y: 1024, width: 1024, height: 1024)
-
-        for index in 0 ..< lottie.numberOfFrames {
-            lottie.render(
-                frameAt: index,
-                into: &buffer,
-                stride: Int(stride),
-                size: size,
-                crop: crop
-            )
+            XCTFail("Expected failedToLoadLottieFromPath error to be thrown, but no error was thrown.")
+        } catch {
+            XCTAssertEqual(error as? LottieError, .failedToLoadLottieFromPath)
         }
     }
 
-    func oldImplemetation() throws {
-        let animation = Animation(path: "andy.json")
+    func testInit_WithValidString_Succeeds() throws {
+        let animationJson = try NSMutableString(contentsOf: testLottieUrl, encoding: String.Encoding.utf8.rawValue)
+        let lottie = try Lottie(string: animationJson as String, size: testSize)
 
-        let sampler = AnimationFrameSampler(animation: animation)
+        XCTAssertEqual(lottie.numberOfFrames, 180)
+    }
 
-        let size = CGSize(width: 2048, height: 2048)
-        let stride = size.width
-        var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
+    func testInit_WithInvalidString_ThrowsError() throws {
+        do {
+            _ = try Lottie(string: "", size: testSize)
 
-        let renderer = Renderer(buffer: &buffer, stride: UInt32(stride), width: UInt32(size.width), height: UInt32(size.height))
-
-        renderer.pushAnimationOntoCanvas(animation)
-
-        while sampler.hasMoreSamples() {
-            renderer.clear()
-            try sampler.nextSample()
-
-            renderer.render(animation: animation)
+            XCTFail("Expected failedToLoadLottieFromString error to be thrown, but no error was thrown.")
+        } catch {
+            XCTAssertEqual(error as? LottieError, .failedToLoadLottieFromString)
         }
     }
 
-    // Things to test
-    // cropping
-    // size is correct
-    // initialisers - path versus data string
+    // MARK: Render tests
+
+    func testRender_WithValidFrameIndex_BufferPopulatedWithContent() throws {
+        let lottie = try Lottie(path: testLottieUrl.path, size: testSize)
+        var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
+
+        try lottie.render(frameAt: 0, into: &buffer, stride: Int(testSize.width))
+
+        let bufferHasContent = buffer.contains { $0 != 0 }
+        XCTAssertTrue(bufferHasContent, "Buffer should have non-zero values after rendering.")
+    }
+
+    func testRender_WithValidFrameIndex_ReturnedBufferPopulatedWithContent() throws {
+        let lottie = try Lottie(path: testLottieUrl.path, size: testSize)
+
+        let bufferPointer = try lottie.render(frameAt: 0, stride: Int(testSize.width))
+
+        let buffer = UnsafeBufferPointer(start: bufferPointer, count: Int(testSize.width * testSize.height)).map { $0 }
+
+        let bufferHasContent = buffer.contains { $0 != 0 }
+        XCTAssertTrue(bufferHasContent, "Buffer should have non-zero values after rendering.")
+    }
+
+    func testRender_WithFrameIndexBelowBounds_ThrowsError() throws {
+        let lottie = try Lottie(path: testLottieUrl.path, size: testSize)
+        var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
+
+        do {
+            try lottie.render(frameAt: -1, into: &buffer, stride: Int(testSize.width))
+
+            XCTFail("Expected frameIndexOutOfBounds error to be thrown, but no error was thrown.")
+        } catch {
+            XCTAssertEqual(error as? LottieError, .frameIndexOutOfBounds)
+        }
+    }
+
+    func testRender_WithFrameIndexAboveBounds_ThrowsError() throws {
+        let lottie = try Lottie(path: testLottieUrl.path, size: testSize)
+        var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
+
+        do {
+            try lottie.render(frameAt: 180, into: &buffer, stride: Int(testSize.width))
+
+            XCTFail("Expected frameIndexOutOfBounds error to be thrown, but no error was thrown.")
+        } catch {
+            XCTAssertEqual(error as? LottieError, .frameIndexOutOfBounds)
+        }
+    }
 }
 
 private extension CMTime {
@@ -82,56 +119,3 @@ private extension CMTime {
         self.init(seconds: seconds, preferredTimescale: 600)
     }
 }
-
-private func writeBufferDataToImage(frame: Int, buffer: inout [UInt32], width: UInt32, height: UInt32) {
-
-    let widthInt = Int(width)
-    let heightInt = Int(height)
-    let colorSpace = CGColorSpaceCreateDeviceRGB()
-    let bitmapInfo = CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
-    let bitsPerComponent = 8
-    let bytesPerRow = widthInt * 4
-
-    // Create a CGContext using the buffer
-    guard let context = CGContext(data: &buffer,
-                                  width: widthInt,
-                                  height: heightInt,
-                                  bitsPerComponent: bitsPerComponent,
-                                  bytesPerRow: bytesPerRow,
-                                  space: colorSpace,
-                                  bitmapInfo: bitmapInfo) else {
-        print("Unable to create CGContext")
-        return
-    }
-
-    // Create a CGImage from the context
-    guard let cgImage = context.makeImage() else {
-        print("Unable to create CGImage from CGContext")
-        return
-    }
-
-    // Convert the CGImage to a UIImage
-    let image = UIImage(cgImage: cgImage)
-
-    // Get PNG data from the UIImage
-    guard let pngData = image.pngData() else {
-        print("Unable to get PNG data from UIImage")
-        return
-    }
-
-    // Define the file name and the directory to save the image
-    let fileName = "frame_\(frame).png"
-    let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-    print(documentsDirectory)
-    let fileURL = documentsDirectory.appendingPathComponent(fileName)
-
-    do {
-        // Write the PNG data to a file
-        try pngData.write(to: fileURL, options: .atomic)
-        print("Image saved to \(fileURL)")
-    } catch {
-        print("Error saving image: \(error)")
-    }
-}
-
-// file:///Users/andyf/Library/Developer/CoreSimulator/Devices/74BC5A93-5EA4-4C18-82F6-298028503AA3/data/Documents
