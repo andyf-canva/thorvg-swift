@@ -77,14 +77,14 @@ public class Lottie {
         let picture = tvg_animation_get_picture(animation)
         tvg_picture_set_size(picture, Float(size.width), Float(size.height))
 
-        if let cropRect = crop {
+        if let crop {
             let cropShape = tvg_shape_new()
             tvg_shape_append_rect(
                 cropShape,
-                Float(cropRect.origin.x),
-                Float(cropRect.origin.y),
-                Float(cropRect.width),
-                Float(cropRect.height), 0, 0
+                Float(crop.origin.x),
+                Float(crop.origin.y),
+                Float(crop.width),
+                Float(crop.height), 0, 0
             )
             tvg_paint_set_composite_method(picture, cropShape, TVG_COMPOSITE_METHOD_CLIP_PATH)
         }
@@ -96,7 +96,7 @@ public class Lottie {
         self.crop = crop
     }
 
-    /// Renders a Lottie frame, creating a new buffer at runtime.
+    /// Renders a Lottie frame into a new buffer.
     /// - Parameters:
     ///   - index: The index of the frame to render.
     ///   - stride: The stride of the buffer.
@@ -119,7 +119,10 @@ public class Lottie {
         guard index < numberOfFrames, index >= 0 else {
             throw LottieError.frameIndexOutOfBounds
         }
-        try initializeCanvasIfNeeded(with: buffer, stride: stride, size: size)
+
+        if canvas == nil {
+            canvas = try createCanvas(with: buffer, stride: stride, size: size)
+        }
 
         tvg_canvas_clear(canvas, false, true)
         tvg_animation_set_frame(animation, Float(index))
@@ -134,18 +137,18 @@ public class Lottie {
         tvg_canvas_sync(canvas)
     }
 
-    private func initializeCanvasIfNeeded(with buffer: Buffer, stride: Int, size: CGSize) throws {
-        guard canvas == nil else { return }
-
+    private func createCanvas(with buffer: Buffer, stride: Int, size: CGSize) throws -> OpaquePointer! {
         guard tvg_engine_init(TVG_ENGINE_SW, 4) == TVG_RESULT_SUCCESS else {
             throw LottieError.failedToInitialiseTvgEngine
         }
 
-        canvas = tvg_swcanvas_create()
+        let canvas = tvg_swcanvas_create()
         tvg_swcanvas_set_target(canvas, buffer, UInt32(stride), UInt32(size.width), UInt32(size.height), TVG_COLORSPACE_ARGB8888)
 
         let picture = tvg_animation_get_picture(animation)
         tvg_canvas_push(canvas, picture)
+
+        return canvas
     }
 
     deinit {

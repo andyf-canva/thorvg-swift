@@ -6,7 +6,7 @@ import XCTest
 final class LottieTests: XCTestCase {
 
     let testLottieUrl = Bundle.module.url(forResource: "test", withExtension: "json")!
-    let testSize = CGSize(width: 2048, height: 2048)
+    let testSize = CGSize(width: 1024, height: 1024)
 
     // MARK: Initialiser tests
 
@@ -25,16 +25,16 @@ final class LottieTests: XCTestCase {
     func testInit_WithValidPath_ReturnsCorrectSize() throws {
         let lottie = try Lottie(path: testLottieUrl.path, size: testSize)
 
-        XCTAssertEqual(lottie.size.height, 2048)
-        XCTAssertEqual(lottie.size.width, 2048)
+        XCTAssertEqual(lottie.size.height, 1024)
+        XCTAssertEqual(lottie.size.width, 1024)
     }
 
     func testInit_WithValidPath_AndCropped_ReturnsCorrectSize() throws {
         let cropRect = CGRect(x: 0, y: 0, width: 1024, height: 1024)
         let lottie = try Lottie(path: testLottieUrl.path, size: testSize, crop: cropRect)
 
-        XCTAssertEqual(lottie.size.height, 2048)
-        XCTAssertEqual(lottie.size.width, 2048)
+        XCTAssertEqual(lottie.size.height, 1024)
+        XCTAssertEqual(lottie.size.width, 1024)
     }
 
     func testInit_WithInvalidPath_ThrowsError() {
@@ -48,8 +48,8 @@ final class LottieTests: XCTestCase {
     }
 
     func testInit_WithValidString_Succeeds() throws {
-        let animationJson = try NSMutableString(contentsOf: testLottieUrl, encoding: String.Encoding.utf8.rawValue)
-        let lottie = try Lottie(string: animationJson as String, size: testSize)
+        let animationJson = try NSMutableString(contentsOf: testLottieUrl, encoding: String.Encoding.utf8.rawValue) as String
+        let lottie = try Lottie(string: animationJson, size: testSize)
 
         XCTAssertEqual(lottie.numberOfFrames, 180)
     }
