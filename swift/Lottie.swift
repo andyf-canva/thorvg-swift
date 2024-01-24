@@ -3,7 +3,7 @@ import CoreMedia
 
 import thorvg
 
-/// Represents errors that can occur while working with Lottie animations.
+/// Errors that can occur while working with Lottie animations.
 public enum LottieError: Error {
     case failedToLoadLottieFromString
     case failedToLoadLottieFromPath
@@ -21,7 +21,7 @@ private typealias Animation = OpaquePointer
 /// Shorthand for a pointer to an internal rendering canvas
 private typealias Canvas = OpaquePointer
 
-/// A class representing a Lottie animation, providing functionalities to load and render Lottie frames.
+/// Object used to load and render Lottie frames.
 public class Lottie {
     /// The number of frames in the Lottie animation.
     public let numberOfFrames: Int
@@ -85,7 +85,7 @@ public class Lottie {
     ///   - stride: The stride of the buffer.
     ///   - size: The desired size of the rendered frame.
     ///   - crop: Optional rectangle to crop the rendered frame.
-    func render(frameAt index: Int, into buffer: Buffer, stride: Int, size: CGSize, crop: CGRect? = nil) throws {
+    public func render(frameAt index: Int, into buffer: Buffer, stride: Int, size: CGSize, crop: CGRect? = nil) throws {
         guard index < numberOfFrames, index >= 0 else {
             throw LottieError.frameIndexOutOfBounds
         }
