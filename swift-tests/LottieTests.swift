@@ -61,17 +61,6 @@ final class LottieTests: XCTestCase {
         XCTAssertTrue(bufferHasContent, "Buffer should have non-zero values after rendering.")
     }
 
-    func testRender_WithValidFrameIndex_ReturnedBufferPopulatedWithContent() throws {
-        let lottie = try Lottie(path: testLottieUrl.path)
-
-        let bufferPointer = try lottie.render(frameAt: 0, stride: Int(testSize.width), size: testSize)
-
-        let buffer = UnsafeBufferPointer(start: bufferPointer, count: Int(testSize.width * testSize.height)).map { $0 }
-
-        let bufferHasContent = buffer.contains { $0 != 0 }
-        XCTAssertTrue(bufferHasContent, "Buffer should have non-zero values after rendering.")
-    }
-
     func testRender_WithFrameIndexBelowBounds_ThrowsError() throws {
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))

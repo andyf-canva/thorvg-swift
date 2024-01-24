@@ -78,21 +78,7 @@ public class Lottie {
         self.duration = CMTime(seconds: Double(duration), preferredTimescale: 600)
     }
 
-    /// Renders a Lottie frame into a new buffer.
-    /// - Parameters:
-    ///   - index: The index of the frame to render.
-    ///   - stride: The stride of the buffer.
-    /// - Returns: A buffer containing the rendered Lottie frame.
-    func render(frameAt index: Int, stride: Int, size: CGSize, crop: CGRect? = nil) throws -> Buffer {
-        let bufferSize = Int(size.width * size.height)
-        let buffer = Buffer.allocate(capacity: bufferSize)
-        buffer.initialize(repeating: 0, count: bufferSize)
-
-        try render(frameAt: index, into: buffer, stride: stride, size: size, crop: crop)
-        return buffer
-    }
-
-    /// Renders a Lottie frame into an existing buffer.
+    /// Renders a Lottie frame into a buffer.
     /// - Parameters:
     ///   - index: The index of the frame to render.
     ///   - buffer: The buffer to render the frame into.
