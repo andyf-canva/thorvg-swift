@@ -83,6 +83,8 @@ public class Lottie {
     ///   - index: The index of the frame to render.
     ///   - buffer: The buffer to render the frame into.
     ///   - stride: The stride of the buffer.
+    ///   - size: The desired size of the rendered frame.
+    ///   - crop: Optional rectangle to crop the rendered frame.
     func render(frameAt index: Int, into buffer: Buffer, stride: Int, size: CGSize, crop: CGRect? = nil) throws {
         guard index < numberOfFrames, index >= 0 else {
             throw LottieError.frameIndexOutOfBounds
