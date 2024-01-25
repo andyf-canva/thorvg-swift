@@ -8,7 +8,8 @@ public enum LottieError: Error {
     case failedToLoadLottieFromString
     case failedToLoadLottieFromPath
     case failedToDrawLottieFrameOntoCanvas
-    case failedToInitialiseTvgEngine
+    case failedToPushToCanvas
+    case failedToInitializeTVGEngine
     case frameIndexOutOfBounds
 }
 
@@ -85,7 +86,7 @@ public class Lottie {
     ///   - stride: The stride of the buffer.
     ///   - size: The desired size of the rendered frame.
     ///   - crop: Optional rectangle to crop the rendered frame.
-    public func render(frameAt index: Int, into buffer: Buffer, stride: Int, size: CGSize, crop: CGRect? = nil) throws {
+    public func renderFrame(at index: Int, into buffer: Buffer, stride: Int, size: CGSize, crop: CGRect? = nil) throws {
         guard index < numberOfFrames, index >= 0 else {
             throw LottieError.frameIndexOutOfBounds
         }
@@ -100,22 +101,24 @@ public class Lottie {
 
     /// Creates a new canvas for rendering, initializing the TVG engine and setting the target buffer.
     private func createCanvas(with buffer: Buffer, stride: Int, size: CGSize) throws -> Canvas? {
-        guard tvg_engine_init(TVG_ENGINE_SW, 4) == TVG_RESULT_SUCCESS else {
-            throw LottieError.failedToInitialiseTvgEngine
+        guard tvg_engine_init(TVG_ENGINE_SW, UInt32(ProcessInfo.processInfo.activeProcessorCount)) == TVG_RESULT_SUCCESS else {
+            throw LottieError.failedToInitializeTVGEngine
         }
 
         let canvas = tvg_swcanvas_create()
         tvg_swcanvas_set_target(canvas, buffer, UInt32(stride), UInt32(size.width), UInt32(size.height), TVG_COLORSPACE_ARGB8888)
+        tvg_swcanvas_set_mempool(canvas, TVG_MEMPOOL_POLICY_DEFAULT)
 
         let picture = tvg_animation_get_picture(animation)
-        tvg_canvas_push(canvas, picture)
+        guard tvg_canvas_push(canvas, picture) == TVG_RESULT_SUCCESS else {
+            throw LottieError.failedToPushToCanvas
+        }
 
         return canvas
     }
 
     /// Prepares the canvas for rendering by setting the frame, adjusting the picture size, and optionally applying a crop.
     private func prepareCanvasForRendering(frameIndex index: Int, size: CGSize, crop: CGRect?) {
-        tvg_canvas_clear(canvas, false, true)
         tvg_animation_set_frame(animation, Float(index))
 
         let picture = tvg_animation_get_picture(animation)
@@ -128,7 +131,9 @@ public class Lottie {
                 Float(crop.origin.x),
                 Float(crop.origin.y),
                 Float(crop.width),
-                Float(crop.height), 0, 0
+                Float(crop.height), 
+                0,
+                0
             )
             tvg_paint_set_composite_method(picture, cropShape, TVG_COMPOSITE_METHOD_CLIP_PATH)
         }
@@ -138,6 +143,8 @@ public class Lottie {
 
     /// Renders the prepared content of the canvas onto the actual canvas.
     private func renderCanvas() throws {
+        tvg_canvas_clear(canvas, false, true)
+
         guard tvg_canvas_draw(canvas) == TVG_RESULT_SUCCESS else {
             throw LottieError.failedToDrawLottieFrameOntoCanvas
         }
@@ -146,7 +153,8 @@ public class Lottie {
     }
 
     deinit {
-        tvg_animation_del(animation)
         tvg_canvas_destroy(canvas)
+        tvg_animation_del(animation)
+        tvg_engine_term(TVG_ENGINE_SW)
     }
 }

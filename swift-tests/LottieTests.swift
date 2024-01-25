@@ -55,7 +55,7 @@ final class LottieTests: XCTestCase {
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
 
-        try lottie.render(frameAt: 0, into: &buffer, stride: Int(testSize.width), size: testSize)
+        try lottie.renderFrame(at: 0, into: &buffer, stride: Int(testSize.width), size: testSize)
 
         let bufferHasContent = buffer.contains { $0 != 0 }
         XCTAssertTrue(bufferHasContent, "Buffer should have non-zero values after rendering.")
@@ -66,7 +66,7 @@ final class LottieTests: XCTestCase {
         var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
 
         do {
-            try lottie.render(frameAt: -1, into: &buffer, stride: Int(testSize.width), size: testSize)
+            try lottie.renderFrame(at: -1, into: &buffer, stride: Int(testSize.width), size: testSize)
 
             XCTFail("Expected frameIndexOutOfBounds error to be thrown, but no error was thrown.")
         } catch {
@@ -79,7 +79,7 @@ final class LottieTests: XCTestCase {
         var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
 
         do {
-            try lottie.render(frameAt: 180, into: &buffer, stride: Int(testSize.width), size: testSize)
+            try lottie.renderFrame(at: 180, into: &buffer, stride: Int(testSize.width), size: testSize)
 
             XCTFail("Expected frameIndexOutOfBounds error to be thrown, but no error was thrown.")
         } catch {
