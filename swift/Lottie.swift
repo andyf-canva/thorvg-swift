@@ -30,10 +30,13 @@ public class Lottie {
     /// The duration of the Lottie animation.
     public let duration: CMTime
 
-    /// The Lottie animation, used for manipulating and rendering frames.
+    /// The original size of the Lottie animation.
+    public let size: CGSize
+
+    /// The internal animation object, used for manipulating and rendering frames.
     private let animation: Animation?
 
-    /// The canvas used for rendering the animation frames, allowing reuse across renders.
+    /// The internal canvas used for rendering the animation frames, allowing reuse across renders.
     private var canvas: Canvas? = nil
 
     /// Initializes a new Lottie instance from a file path.
@@ -74,9 +77,15 @@ public class Lottie {
         var duration: Float = 0
         tvg_animation_get_duration(animation, &duration)
 
+        var width: Float = 0
+        var height: Float = 0
+        let picture = tvg_animation_get_picture(animation)
+        tvg_picture_get_size(picture, &width, &height)
+
         self.animation = animation
         self.numberOfFrames = Int(numberOfFrames)
         self.duration = CMTime(seconds: Double(duration), preferredTimescale: 600)
+        self.size = CGSize(width: Double(width), height: Double(height))
     }
 
     /// Renders a Lottie frame into a buffer.

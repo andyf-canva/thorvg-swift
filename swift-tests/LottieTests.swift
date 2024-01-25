@@ -22,6 +22,12 @@ final class LottieTests: XCTestCase {
         XCTAssertEqual(lottie.duration, CMTime(seconds: 3))
     }
 
+    func testInit_WithValidPath_ReturnsCorrectSize() throws {
+        let lottie = try Lottie(path: testLottieUrl.path)
+
+        XCTAssertEqual(lottie.size, CGSize(width: 1024, height: 1024))
+    }
+
     func testInit_WithInvalidPath_ThrowsError() {
         do {
             _ = try Lottie(path: "")
