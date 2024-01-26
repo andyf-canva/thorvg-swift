@@ -16,8 +16,7 @@ let package = Package(
         .target(
             name: "thorvg-swift",
             dependencies: ["thorvg"],
-            path: "swift",
-            swiftSettings: [.interoperabilityMode(.Cxx)]
+            path: "swift"
         ),
         .target(
             name: "thorvg",
@@ -55,8 +54,7 @@ let package = Package(
             name: "thorvg-swift-tests",
             dependencies: ["thorvg-swift"],
             path: "swift-tests",
-            resources: [.process("Resources")],
-            swiftSettings: [.interoperabilityMode(.Cxx)]
+            resources: [.process("Resources")]
         ),
     ],
     cxxLanguageStandard: .cxx14
