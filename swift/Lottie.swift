@@ -11,6 +11,7 @@ public enum LottieError: Error {
     case failedToPushToCanvas
     case failedToInitializeTVGEngine
     case frameIndexOutOfBounds
+    case croppingRectangleOutsideOfFrameBounds
 }
 
 /// Shorthand for the buffer type used to represent image pixel data.
@@ -94,7 +95,7 @@ public class Lottie {
     ///   - buffer: The buffer to render the frame into.
     ///   - stride: The stride of the buffer.
     ///   - size: The desired size of the rendered frame.
-    ///   - crop: Optional rectangle to crop the rendered frame.
+    ///   - crop: Optional rectangle to crop the rendered frame. If provided, the cropped area is scaled and positioned to fit the specified size while preserving its aspect ratio.
     public func renderFrame(at index: Int, into buffer: Buffer, stride: Int, size: CGSize, crop: CGRect? = nil) throws {
         guard index < numberOfFrames, index >= 0 else {
             throw LottieError.frameIndexOutOfBounds
@@ -104,7 +105,7 @@ public class Lottie {
             canvas = try createCanvas(with: buffer, stride: stride, size: size)
         }
 
-        prepareCanvasForRendering(frameIndex: index, size: size, crop: crop)
+        try prepareCanvasForRendering(frameIndex: index, size: size, crop: crop)
         try renderCanvas()
     }
 
@@ -127,27 +128,61 @@ public class Lottie {
     }
 
     /// Prepares the canvas for rendering by setting the frame, adjusting the picture size, and optionally applying a crop.
-    private func prepareCanvasForRendering(frameIndex index: Int, size: CGSize, crop: CGRect?) {
+    private func prepareCanvasForRendering(frameIndex index: Int, size: CGSize, crop: CGRect?) throws {
         tvg_animation_set_frame(animation, Float(index))
 
         let picture = tvg_animation_get_picture(animation)
         tvg_picture_set_size(picture, Float(size.width), Float(size.height))
 
         if let crop {
-            let cropShape = tvg_shape_new()
-            tvg_shape_append_rect(
-                cropShape,
-                Float(crop.origin.x),
-                Float(crop.origin.y),
-                Float(crop.width),
-                Float(crop.height), 
-                0,
-                0
-            )
-            tvg_paint_set_composite_method(picture, cropShape, TVG_COMPOSITE_METHOD_CLIP_PATH)
+            try applyCropping(crop, relativeTo: size)
         }
 
         tvg_canvas_update_paint(canvas, picture)
+    }
+
+    /// Applies cropping to the Lottie animation by resizing and translating the picture to fit within a specified cropping rectangle, relative to a given size.
+    /// Note: The function ensures that the cropped area is scaled and positioned correctly to fit within the specified size, maintaining the aspect ratio of the cropped area.
+    private func applyCropping(_ crop: CGRect, relativeTo size: CGSize) throws {
+        guard crop.width <= size.width, crop.height <= size.height else {
+            throw LottieError.croppingRectangleOutsideOfFrameBounds
+        }
+
+        let picture = tvg_animation_get_picture(animation)
+
+        let cropShape = tvg_shape_new()
+        tvg_shape_append_rect(
+            cropShape,
+            Float(crop.origin.x),
+            Float(crop.origin.y),
+            Float(crop.width),
+            Float(crop.height),
+            0,
+            0
+        )
+        tvg_paint_set_composite_method(picture, cropShape, TVG_COMPOSITE_METHOD_CLIP_PATH)
+
+        let uniformScale = min(Float(size.width) / Float(crop.width), Float(size.height) / Float(crop.height))
+        tvg_paint_scale(picture, uniformScale)
+
+        let translateX = -Float(crop.origin.x) * uniformScale
+        let translateY = -Float(crop.origin.y) * uniformScale
+        tvg_paint_translate(picture, translateX, translateY)
+
+        // Create a mask to clip any excess area after scaling
+        if uniformScale != 1 {
+            let maskShape = tvg_shape_new()
+            tvg_shape_append_rect(
+                maskShape,
+                0,
+                0,
+                Float(size.width),
+                Float(size.height),
+                0,
+                0
+            )
+            tvg_paint_set_composite_method(picture, maskShape, TVG_COMPOSITE_METHOD_CLIP_PATH)
+        }
     }
 
     /// Renders the prepared content of the canvas onto the actual canvas.

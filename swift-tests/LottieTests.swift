@@ -55,9 +55,9 @@ final class LottieTests: XCTestCase {
         }
     }
 
-    // MARK: Render tests
+    // MARK: Render Frame tests
 
-    func testRender_WithValidFrameIndex_BufferPopulatedWithContent() throws {
+    func testRenderFrame_WithValidFrameIndex_BufferPopulatedWithContent() throws {
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
 
@@ -80,7 +80,7 @@ final class LottieTests: XCTestCase {
         }
     }
 
-    func testRender_WithFrameIndexBelowBounds_ThrowsError() throws {
+    func testRenderFrame_WithFrameIndexBelowBounds_ThrowsError() throws {
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
 
@@ -93,7 +93,7 @@ final class LottieTests: XCTestCase {
         }
     }
 
-    func testRender_WithFrameIndexAboveBounds_ThrowsError() throws {
+    func testRenderFrame_WithFrameIndexAboveBounds_ThrowsError() throws {
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
 
@@ -103,6 +103,20 @@ final class LottieTests: XCTestCase {
             XCTFail("Expected frameIndexOutOfBounds error to be thrown, but no error was thrown.")
         } catch {
             XCTAssertEqual(error as? LottieError, .frameIndexOutOfBounds)
+        }
+    }
+
+    func testRenderFrame_WithCropLargerThanSize_ThrowsError() throws {
+        let lottie = try Lottie(path: testLottieUrl.path)
+        var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
+        let crop = CGRect(x: 0, y: 0, width: 2048, height: 2048)
+
+        do {
+            try lottie.renderFrame(at: 0, into: &buffer, stride: Int(testSize.width), size: testSize, crop: crop)
+
+            XCTFail("Expected croppingRectangleOutsideOfFrameBounds error to be thrown, but no error was thrown.")
+        } catch {
+            XCTAssertEqual(error as? LottieError, .croppingRectangleOutsideOfFrameBounds)
         }
     }
 }

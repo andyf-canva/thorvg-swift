@@ -12,6 +12,9 @@ let package = Package(
             name: "thorvg-swift",
             targets: ["thorvg-swift"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", .upToNextMinor(from: "1.15.0")),
+    ],
     targets: [
         .target(
             name: "thorvg-swift",
@@ -52,8 +55,12 @@ let package = Package(
         ),
         .testTarget(
             name: "thorvg-swift-tests",
-            dependencies: ["thorvg-swift"],
+            dependencies: [
+                "thorvg-swift",
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+            ],
             path: "swift-tests",
+            exclude: ["SnapshotTests/__Snapshots__"],
             resources: [.process("Resources")]
         ),
     ],
