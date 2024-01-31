@@ -22,7 +22,7 @@ class LottieSamplerSnapshotTests: XCTestCase {
         assertSnapshot(matching: image, as: .image)
     }
 
-    func testRenderFrame_WhenDesiredSizeIsLargerThanOriginalSize_ProducesScaledImageSnapshot() throws {
+    func testRenderFrame_WhenDesiredSizeIsLargerThanLottieOriginalSize_ProducesScaledImageSnapshot() throws {
         let size = CGSize(width: 2048, height: 2048)
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
@@ -37,7 +37,22 @@ class LottieSamplerSnapshotTests: XCTestCase {
         assertSnapshot(matching: image, as: .image)
     }
 
-    func testRenderFrame_WhenCropped_ProducesCroppedAndScaledImageSnapshot() throws {
+    func testRenderFrame_WhenDesiredSizeIsSmallerThanLottieOriginalSize_ProducesScaledImageSnapshot() throws {
+        let size = CGSize(width: 512, height: 512)
+        let lottie = try Lottie(path: testLottieUrl.path)
+        var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
+
+        try lottie.renderFrame(at: 0, into: &buffer, stride: Int(size.width), size: size)
+
+        guard let image = UIImage(buffer: &buffer, size: size) else {
+            XCTFail("Unable to create UIImage from buffer")
+            return
+        }
+
+        assertSnapshot(matching: image, as: .image)
+    }
+
+    func testRenderFrame_WhenCenterCropped_ProducesCroppedAndScaledImageSnapshot() throws {
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
         let crop = CGRect(x: 384, y: 384, width: 256, height: 256)
