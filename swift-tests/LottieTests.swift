@@ -71,8 +71,12 @@ final class LottieTests: XCTestCase {
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
 
-        for index in 0 ..< lottie.numberOfFrames {
-            try lottie.renderFrame(at: index, into: &buffer, stride: Int(testSize.width), size: testSize)
+        do {
+            for index in 0 ..< lottie.numberOfFrames {
+                try lottie.renderFrame(at: index, into: &buffer, stride: Int(testSize.width), size: testSize)
+            }
+        } catch {
+            XCTFail("Expected to render all lottie frames successfully, but \(error) error was thrown")
         }
     }
 
