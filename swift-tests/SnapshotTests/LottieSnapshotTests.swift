@@ -8,7 +8,7 @@ class LottieSamplerSnapshotTests: XCTestCase {
     private let testLottieUrl: URL = Bundle.module.url(forResource: "test", withExtension: "json")!
     private let testSize = CGSize(width: 1024, height: 1024)
 
-    func testRenderFrame_WhenGivenValidBufferAndSize_ProducesCorrectImageSnapshot() throws {
+    func testRenderFrame_WhenValidBufferAndSize_ReturnsCorrectImageSnapshot() throws {
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
 
@@ -22,7 +22,7 @@ class LottieSamplerSnapshotTests: XCTestCase {
         assertSnapshot(matching: image, as: .image)
     }
 
-    func testRenderFrame_WhenDesiredSizeIsLargerThanLottieOriginalSize_ProducesScaledImageSnapshot() throws {
+    func testRenderFrame_WhenDesiredSizeIsLargerThanLottieOriginalSize_ReturnsScaledImageSnapshot() throws {
         let size = CGSize(width: 2048, height: 2048)
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
@@ -37,7 +37,7 @@ class LottieSamplerSnapshotTests: XCTestCase {
         assertSnapshot(matching: image, as: .image)
     }
 
-    func testRenderFrame_WhenDesiredSizeIsSmallerThanLottieOriginalSize_ProducesScaledImageSnapshot() throws {
+    func testRenderFrame_WhenDesiredSizeIsSmallerThanLottieOriginalSize_ReturnsScaledImageSnapshot() throws {
         let size = CGSize(width: 512, height: 512)
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
@@ -52,7 +52,7 @@ class LottieSamplerSnapshotTests: XCTestCase {
         assertSnapshot(matching: image, as: .image)
     }
 
-    func testRenderFrame_WhenCenterCropped_ProducesCroppedAndScaledImageSnapshot() throws {
+    func testRenderFrame_WhenCenterCropped_ReturnsCroppedAndScaledImageSnapshot() throws {
         let lottie = try Lottie(path: testLottieUrl.path)
         var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
         let crop = CGRect(x: 384, y: 384, width: 256, height: 256)

@@ -23,6 +23,9 @@ private typealias Animation = OpaquePointer
 /// Shorthand for a pointer to an internal rendering canvas
 private typealias Canvas = OpaquePointer
 
+/// Shorthand for a pointer to an internal picture object
+private typealias Picture = OpaquePointer
+
 /// Object used to load and render Lottie frames.
 public class Lottie {
     /// The number of frames in the Lottie animation.
@@ -135,7 +138,7 @@ public class Lottie {
         tvg_picture_set_size(picture, Float(size.width), Float(size.height))
 
         if let crop {
-            try applyCropping(crop, relativeTo: size)
+            try applyCropping(crop, to: picture, relativeTo: size)
         }
 
         tvg_canvas_update_paint(canvas, picture)
@@ -143,46 +146,34 @@ public class Lottie {
 
     /// Applies cropping to the Lottie animation by resizing and translating the picture to fit within a specified cropping rectangle, relative to a given size.
     /// Note: The function ensures that the cropped area is scaled and positioned correctly to fit within the specified size, maintaining the aspect ratio of the cropped area.
-    private func applyCropping(_ crop: CGRect, relativeTo size: CGSize) throws {
+    private func applyCropping(_ crop: CGRect, to picture: Picture?, relativeTo size: CGSize) throws {
         guard crop.width <= size.width, crop.height <= size.height else {
             throw LottieError.croppingRectangleOutsideOfFrameBounds
         }
 
-        let picture = tvg_animation_get_picture(animation)
-
-        let cropShape = tvg_shape_new()
-        tvg_shape_append_rect(
-            cropShape,
-            Float(crop.origin.x),
-            Float(crop.origin.y),
-            Float(crop.width),
-            Float(crop.height),
-            0,
-            0
-        )
-        tvg_paint_set_composite_method(picture, cropShape, TVG_COMPOSITE_METHOD_CLIP_PATH)
-
-        let uniformScale = min(Float(size.width) / Float(crop.width), Float(size.height) / Float(crop.height))
+        // Calculate the uniform scale factor to fit the cropped area within the specified size.
+        let uniformScale = Float(min(size.width / crop.width, size.height / crop.height))
         tvg_paint_scale(picture, uniformScale)
 
+        // Calculate the position to translate the picture after scaling.
         let translateX = -Float(crop.origin.x) * uniformScale
         let translateY = -Float(crop.origin.y) * uniformScale
         tvg_paint_translate(picture, translateX, translateY)
 
-        // Create a mask to clip any excess area after scaling
-        if uniformScale != 1 {
-            let maskShape = tvg_shape_new()
-            tvg_shape_append_rect(
-                maskShape,
-                0,
-                0,
-                Float(size.width),
-                Float(size.height),
-                0,
-                0
-            )
-            tvg_paint_set_composite_method(picture, maskShape, TVG_COMPOSITE_METHOD_CLIP_PATH)
-        }
+        // Define the cropping shape based on the scaled and translated dimensions.
+        let cropShape = tvg_shape_new()
+        tvg_shape_append_rect(
+            cropShape,
+            0,
+            0,
+            Float(size.width),
+            Float(size.height),
+            0,
+            0
+        )
+
+        // Apply the cropping shape as a clipping path to the picture.
+        tvg_paint_set_composite_method(picture, cropShape, TVG_COMPOSITE_METHOD_CLIP_PATH)
     }
 
     /// Renders the prepared content of the canvas onto the actual canvas.
