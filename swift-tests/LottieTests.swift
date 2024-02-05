@@ -119,6 +119,20 @@ final class LottieTests: XCTestCase {
             XCTAssertEqual(error as? LottieError, .croppingRectangleOutsideOfFrameBounds)
         }
     }
+
+    func testGreenTick() throws {
+        let url = Bundle.module.url(forResource: "tick", withExtension: "json")!
+        let lottie = try Lottie(path: url.path)
+        var buffer = [UInt32](repeating: 0, count: Int(testSize.width * testSize.height))
+
+        for frameIndex in 0 ..< lottie.numberOfFrames {
+            try lottie.renderFrame(at: frameIndex, into: &buffer, stride: Int(testSize.width), size: testSize)
+            writeBufferDataToImage(frame: frameIndex, buffer: &buffer, width: UInt32(testSize.width), height: UInt32(testSize.height))
+        }
+    }
+
+    //  file:///Users/andyf/Library/Developer/CoreSimulator/Devices/74BC5A93-5EA4-4C18-82F6-298028503AA3/data/Documents
+
 }
 
 private extension CMTime {
@@ -126,3 +140,91 @@ private extension CMTime {
         self.init(seconds: seconds, preferredTimescale: 600)
     }
 }
+
+private func writeBufferDataToImage(frame: Int, buffer: inout [UInt32], width: UInt32, height: UInt32) {
+
+    let widthInt = Int(width)
+
+    let heightInt = Int(height)
+
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+
+    let bitmapInfo = CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
+
+    let bitsPerComponent = 8
+
+    let bytesPerRow = widthInt * 4
+
+    // Create a CGContext using the buffer
+
+    guard let context = CGContext(data: &buffer,
+
+                                  width: widthInt,
+
+                                  height: heightInt,
+
+                                  bitsPerComponent: bitsPerComponent,
+
+                                  bytesPerRow: bytesPerRow,
+
+                                  space: colorSpace,
+
+                                  bitmapInfo: bitmapInfo) else {
+
+        print("Unable to create CGContext")
+
+        return
+
+    }
+
+    // Create a CGImage from the context
+
+    guard let cgImage = context.makeImage() else {
+
+        print("Unable to create CGImage from CGContext")
+
+        return
+
+    }
+
+    // Convert the CGImage to a UIImage
+
+    let image = UIImage(cgImage: cgImage)
+
+    // Get PNG data from the UIImage
+
+    guard let pngData = image.pngData() else {
+
+        print("Unable to get PNG data from UIImage")
+
+        return
+
+    }
+
+    // Define the file name and the directory to save the image
+
+    let fileName = "frame_\(frame).png"
+
+    let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+
+    print(documentsDirectory)
+
+    let fileURL = documentsDirectory.appendingPathComponent(fileName)
+
+    do {
+
+        // Write the PNG data to a file
+
+        try pngData.write(to: fileURL, options: .atomic)
+
+        print("Image saved to \(fileURL)")
+
+    } catch {
+
+        print("Error saving image: \(error)")
+
+    }
+
+}
+
+// file:///Users/andyf/Library/Developer/CoreSimulator/Devices/74BC5A93-5EA4-4C18-82F6-298028503AA3/data/Documents
