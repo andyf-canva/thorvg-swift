@@ -65,7 +65,7 @@ public class Lottie {
         let picture = tvg_animation_get_picture(animation)
 
         guard let cString = string.cString(using: .utf8),
-              tvg_picture_load_data(picture, cString, UInt32(cString.count), "lottie", "", false) == TVG_RESULT_SUCCESS
+              tvg_picture_load_data(picture, cString, UInt32(cString.count), "lottie", false) == TVG_RESULT_SUCCESS
         else {
             throw LottieError.failedToLoadLottieFromString
         }
@@ -178,7 +178,7 @@ public class Lottie {
 
     /// Renders the prepared content of the canvas onto the actual canvas.
     private func renderCanvas() throws {
-        tvg_canvas_clear(canvas, false, true)
+        tvg_canvas_clear(canvas, false)
 
         guard tvg_canvas_draw(canvas) == TVG_RESULT_SUCCESS else {
             throw LottieError.failedToDrawLottieFrameOntoCanvas
