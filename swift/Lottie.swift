@@ -120,7 +120,7 @@ public class Lottie {
 
         let canvas = tvg_swcanvas_create()
         tvg_swcanvas_set_target(canvas, buffer, UInt32(stride), UInt32(size.width), UInt32(size.height), TVG_COLORSPACE_ARGB8888)
-        // tvg_swcanvas_set_mempool(canvas, TVG_MEMPOOL_POLICY_DEFAULT)
+        tvg_swcanvas_set_mempool(canvas, TVG_MEMPOOL_POLICY_DEFAULT)
 
         let picture = tvg_animation_get_picture(animation)
         guard tvg_canvas_push(canvas, picture) == TVG_RESULT_SUCCESS else {
