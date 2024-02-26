@@ -17,15 +17,6 @@ public enum LottieError: Error {
 /// Shorthand for the buffer type used to represent image pixel data.
 public typealias Buffer = UnsafeMutablePointer<UInt32>
 
-/// Shorthand for a pointer to an internal Lottie animation object
-private typealias Animation = OpaquePointer
-
-/// Shorthand for a pointer to an internal rendering canvas
-private typealias Canvas = OpaquePointer
-
-/// Shorthand for a pointer to an internal picture object
-private typealias Picture = OpaquePointer
-
 /// Object used to load and render Lottie frames.
 public class Lottie {
     /// The number of frames in the Lottie animation.
@@ -38,10 +29,10 @@ public class Lottie {
     public let size: CGSize
 
     /// The internal animation object, used for manipulating and rendering frames.
-    private let animation: Animation?
+    private let animation: OpaquePointer?
 
     /// The internal canvas used for rendering the animation frames, allowing reuse across renders.
-    private var canvas: Canvas? = nil
+    private var canvas: OpaquePointer? = nil
 
     /// Initializes a new Lottie instance from a file path.
     /// - Parameters:
@@ -74,7 +65,7 @@ public class Lottie {
     }
 
     /// Initializes the Lottie instance with frame count and duration extracted from the animation pointer.
-    private init(animation: Animation?) throws {
+    private init(animation: OpaquePointer?) throws {
         var numberOfFrames: Float = 0
         tvg_animation_get_total_frame(animation, &numberOfFrames)
 
@@ -113,7 +104,7 @@ public class Lottie {
     }
 
     /// Creates a new canvas for rendering, initializing the TVG engine and setting the target buffer.
-    private func createCanvas(with buffer: Buffer, stride: Int, size: CGSize) throws -> Canvas? {
+    private func createCanvas(with buffer: Buffer, stride: Int, size: CGSize) throws -> OpaquePointer? {
         guard tvg_engine_init(TVG_ENGINE_SW, UInt32(ProcessInfo.processInfo.activeProcessorCount)) == TVG_RESULT_SUCCESS else {
             throw LottieError.failedToInitializeTVGEngine
         }
@@ -146,7 +137,7 @@ public class Lottie {
 
     /// Applies cropping to the Lottie animation by resizing and translating the picture to fit within a specified cropping rectangle, relative to a given size.
     /// Note: The function ensures that the cropped area is scaled and positioned correctly to fit within the specified size, maintaining the aspect ratio of the cropped area.
-    private func applyCropping(_ crop: CGRect, to picture: Picture?, relativeTo size: CGSize) throws {
+    private func applyCropping(_ crop: CGRect, to picture: OpaquePointer?, relativeTo size: CGSize) throws {
         guard crop.width <= size.width, crop.height <= size.height else {
             throw LottieError.croppingRectangleOutsideOfFrameBounds
         }
