@@ -2,6 +2,9 @@ import CoreGraphics
 
 import thorvg
 
+/// Shorthand alias for the buffer type, representing image pixel data in a mutable pointer to UInt32.
+public typealias Buffer = UnsafeMutablePointer<UInt32>
+
 /// A Swift wrapper for ThorVG's Canvas, facilitating drawing operations.
 class Canvas {
     /// Pointer to the underlying ThorVG canvas object.
