@@ -28,7 +28,7 @@ public class Lottie {
     public convenience init(string: String) throws {
         let animation = Animation()
         let picture = animation.getPicture()
-        try picture.load(fromString: string, mimeType: "lottie")
+        try picture.load(fromString: string, mimeType: .lottie)
         self.init(animation: animation)
     }
 

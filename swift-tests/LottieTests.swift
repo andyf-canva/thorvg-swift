@@ -42,7 +42,7 @@ final class LottieTests: XCTestCase {
 
             XCTFail("Expected failedToLoadFromString error to be thrown, but no error was thrown.")
         } catch {
-            XCTAssertEqual(error as? ThorVGError, .failedToLoadFromString)
+            XCTAssertEqual(error as? ThorVGError, .failedToLoadFromDataString)
         }
     }
 }
