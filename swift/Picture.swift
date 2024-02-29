@@ -42,7 +42,7 @@ class Picture {
         guard let cString = string.cString(using: .utf8),
               tvg_picture_load_data(pointer, cString, UInt32(cString.count), mimeType.rawValue, false) == TVG_RESULT_SUCCESS
         else {
-            throw ThorVGError.failedToLoadFromString
+            throw ThorVGError.failedToLoadFromDataString
         }
     }
 
@@ -106,7 +106,7 @@ class Picture {
     /// Note: We "crop" the picture by scaling it relative to it's original size.
     /// This means that we maintain the same perceived size of the picture before and after cropping.
     ///
-    /// This behaviour is akin to a "stretch-to-fit" resizing, as the aspect ratio is not preserved.
+    /// This behaviour is akin to a "stretch-to-fit" resizing, as the picture's original aspect ratio is not preserved.
     func crop(_ crop: CGRect) {
         // Get rid of the unneeded content.
         let cropShape = tvg_shape_new()

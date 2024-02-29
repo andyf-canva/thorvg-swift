@@ -2,6 +2,6 @@
 public enum ThorVGError: Error {
     case frameIndexOutOfRange
     case failedToDrawFrame
-    case failedToLoadFromString
+    case failedToLoadFromDataString
     case failedToLoadFromPath
 }
