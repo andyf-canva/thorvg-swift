@@ -5,38 +5,40 @@ import thorvg
 /// Shorthand alias for the buffer type, representing image pixel data in a mutable pointer to UInt32.
 public typealias Buffer = UnsafeMutablePointer<UInt32>
 
-/// Object responsible for rendering Lottie animations using ThorVG.
+/// Object responsible for rendering a Lottie animation using ThorVG.
 public class LottieRenderer {
-    private let canvas: Canvas
+    private let lottie: Lottie
     private let engine: Engine
+    private let canvas: Canvas
 
-    /// Initializes the Lottie renderer, setting up the canvas.
+    /// Initializes the LottieRenderer with a specific Lottie object, engine, size, buffer, and stride.
     /// - Parameters:
+    ///   - lottie: The `Lottie` object containing the animation to render.
     ///   - engine: An optional `Engine` object to use. If not provided, the default engine configuration is used.
-    ///   - size: The size of the canvas on which to render.
+    ///   - size: The size of the rendering canvas. This size determines the final size of the rendered Lottie content.
     ///   - buffer: A buffer to hold the rendered pixel data.
     ///   - stride: The number of bytes in a row of the buffer.
     public init(
+        _ lottie: Lottie,
         engine: Engine = .default,
         size: CGSize,
         buffer: Buffer,
         stride: Int
     ) {
+        self.lottie = lottie
         self.engine = engine
         self.canvas = Canvas(size: size, buffer: buffer, stride: stride)
     }
 
-    /// Renders a specific frame of a Lottie animation, with optional cropping and rotation.
+    /// Renders a specific frame of the Lottie animation, with cropping and rotation.
     /// - Parameters:
-    ///   - lottie: The `Lottie` object containing the animation to render.
-    ///   - frameIndex: The index of the frame to render.
-    ///   - crop: An optional `CGRect` to crop the rendered frame.
-    ///   - rotation: An optional rotation angle in degrees.
+    ///   - frameIndex: Index of the frame in the animation.
+    ///   - contentRect: Specifies the area of the content to be rendered. This rectangle defines the portion of the animation that should be visible in the final rendered frame, scaled to fit the `LottieRenderer` size.
+    ///   - rotation: Rotation angle in degrees to apply to the renderered frame.
     public func render(
-        _ lottie: Lottie,
         frameIndex: Int,
-        crop: CGRect? = nil,
-        rotation: Double? = nil
+        contentRect: CGRect,
+        rotation: Double = 0.0
     ) throws {
         guard frameIndex < lottie.numberOfFrames, frameIndex >= 0 else {
             throw ThorVGError.frameIndexOutOfRange
@@ -45,16 +47,12 @@ public class LottieRenderer {
         lottie.animation.setFrame(frameIndex)
 
         let picture = lottie.animation.getPicture()
-        picture.setSize(canvas.size)
-        picture.setTransform(.identity)
+        picture.resize(canvas.size)
+        picture.resetTransform()
+        picture.crop(contentRect)
 
-        if let crop {
-            picture.crop(crop)
-        }
-
-        if let rotation {
-            picture.rotateAboutCenter(rotation)
-        }
+        let radians = rotation * .pi / 180.0
+        picture.apply(transform: CGAffineTransform(rotationAngle: radians))
 
         if canvas.isEmpty {
             try canvas.push(picture: picture)
@@ -63,9 +61,5 @@ public class LottieRenderer {
         canvas.clear()
         canvas.update(picture: picture)
         try canvas.draw()
-    }
-
-    deinit {
-        canvas.destroy()
     }
 }

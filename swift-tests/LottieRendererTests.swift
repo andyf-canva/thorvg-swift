@@ -11,12 +11,13 @@ final class LottieRendererTests: XCTestCase {
     }()
 
     let size = CGSize(width: 1024, height: 1024)
+    let contentRect = CGRect(x: 0, y: 0, width: 1024, height: 1024)
 
     func testRender_WithValidFrameIndex_BufferPopulatedWithContent() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(size: size, buffer: &buffer, stride: Int(size.width))
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width))
 
-        try renderer.render(lottie, frameIndex: 0)
+        try renderer.render(frameIndex: 0, contentRect: contentRect)
 
         let bufferHasContent = buffer.contains { $0 != 0 }
         XCTAssertTrue(bufferHasContent, "Buffer should have non-zero values after rendering.")
@@ -24,11 +25,11 @@ final class LottieRendererTests: XCTestCase {
 
     func testRender_WithAllFrames_Succeeds() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(size: size, buffer: &buffer, stride: Int(size.width))
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width))
 
         do {
             for index in 0 ..< lottie.numberOfFrames {
-                try renderer.render(lottie, frameIndex: index)
+                try renderer.render(frameIndex: index, contentRect: contentRect)
             }
         } catch {
             XCTFail("Expected to render all lottie frames successfully, but \(error) error was thrown")
@@ -37,10 +38,10 @@ final class LottieRendererTests: XCTestCase {
 
     func testRenderFrame_WithFrameIndexBelowBounds_ThrowsError() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(size: size, buffer: &buffer, stride: Int(size.width))
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width))
 
         do {
-            try renderer.render(lottie, frameIndex: -1)
+            try renderer.render(frameIndex: -1, contentRect: contentRect)
 
             XCTFail("Expected frameIndexOutOfRange error to be thrown, but no error was thrown.")
         } catch {
@@ -50,10 +51,10 @@ final class LottieRendererTests: XCTestCase {
 
     func testRenderFrame_WithFrameIndexAboveBounds_ThrowsError() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(size: size, buffer: &buffer, stride: Int(size.width))
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width))
 
         do {
-            try renderer.render(lottie, frameIndex: 180)
+            try renderer.render(frameIndex: 180, contentRect: contentRect)
 
             XCTFail("Expected frameIndexOutOfRange error to be thrown, but no error was thrown.")
         } catch {

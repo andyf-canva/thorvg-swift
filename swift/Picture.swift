@@ -78,6 +78,11 @@ class Picture {
         setTransform(transform)
     }
 
+    /// Resets the picture's transform matrix to the identity.
+    func resetTransform() {
+        setTransform(.identity)
+    }
+
     /// Retrieves the current transform applied to the picture.
     private func getTransform() -> CGAffineTransform {
         var matrix = Tvg_Matrix()
