@@ -70,11 +70,10 @@ class Picture {
             y: size.height * anchorPoint.y
         )
 
-        var transform = getTransform()
-        transform = transform
-            .translatedBy(x: pivotPoint.x, y: pivotPoint.y)
+        let transform = getTransform()
+            .concatenating(CGAffineTransform(translationX: -pivotPoint.x, y: -pivotPoint.y))
             .concatenating(transform)
-            .translatedBy(x: -pivotPoint.x, y: -pivotPoint.y)
+            .concatenating(CGAffineTransform(translationX: pivotPoint.x, y: pivotPoint.y))
 
         setTransform(transform)
     }
