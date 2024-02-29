@@ -105,39 +105,23 @@ class Picture {
         tvg_paint_set_transform(pointer, &matrix)
     }
 
-    /// Crops the picture to a specified rectangle, maintaining its perceived size.
+    /// Stretches the picture to a fit inside a specified rectangle.
     ///
-    /// Note: We "crop" the picture by scaling it relative to it's original size.
-    /// This means that we maintain the same perceived size of the picture before and after cropping.
-    ///
-    /// This behaviour is akin to a "stretch-to-fit" resizing, as the picture's original aspect ratio is not preserved.
-    func crop(_ crop: CGRect) {
-        // Get rid of the unneeded content.
-        let cropShape = tvg_shape_new()
-        tvg_shape_append_rect(
-            cropShape,
-            Float(crop.minX),
-            Float(crop.minY),
-            Float(crop.width),
-            Float(crop.height),
-            0,
-            0
-        )
-        tvg_paint_set_composite_method(cropShape, pointer, TVG_COMPOSITE_METHOD_CLIP_PATH)
-
-        // Calculate the scale ratio of the picture size versus the crop rectangle.
+    /// This behaviour is akin to a "stretch-to-fit" resizing as the picture's original aspect ratio is not preserved.
+    func stretchToFit(_ rect: CGRect) {
+        // Calculate the scale ratio of the picture size versus the stretching rectangle.
         let size = getSize()
-        let xRatio = size.width / crop.width
-        let yRatio = size.height / crop.height
+        let xRatio = size.width / rect.width
+        let yRatio = size.height / rect.height
 
         // Scale the size of the picture relative to that ratio.
         let width = size.width * xRatio
         let height = size.height * yRatio
         resize(CGSize(width: width, height: height))
 
-        // Translate the picture back to the origin of the crop rectangle after scaling.
-        let x = crop.minX * xRatio
-        let y = crop.minY * yRatio
+        // Translate the picture to the origin of the rectangle after scaling.
+        let x = rect.minX * xRatio
+        let y = rect.minY * yRatio
         apply(transform: CGAffineTransform(translationX: -x, y: -y))
     }
 }
