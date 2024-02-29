@@ -109,7 +109,7 @@ class Picture {
     ///
     /// This behaviour is akin to a "stretch-to-fit" resizing as the picture's original aspect ratio is not preserved.
     func stretchToFit(_ rect: CGRect) {
-        // Calculate the scale ratio of the picture size versus the stretching rectangle.
+        // Calculate the scale ratio of the picture size versus the rectangle.
         let size = getSize()
         let xRatio = size.width / rect.width
         let yRatio = size.height / rect.height
