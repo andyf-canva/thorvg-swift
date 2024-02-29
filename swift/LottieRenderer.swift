@@ -30,10 +30,10 @@ public class LottieRenderer {
         self.canvas = Canvas(size: size, buffer: buffer, stride: stride)
     }
 
-    /// Renders a specific frame of the Lottie animation, with cropping and rotation.
+    /// Renders a specific frame of the Lottie animation using a specified area of the content, applying optional rotation.
     /// - Parameters:
     ///   - frameIndex: Index of the frame in the animation.
-    ///   - contentRect: Specifies the area of the content to be rendered. This rectangle defines the portion of the animation that should be visible in the final rendered frame, scaled to fit the `LottieRenderer` size.
+    ///   - contentRect: Specifies the area of the content to be rendered. This rectangle defines the portion of the animation that should be visible in the final rendered frame, scaled to fit the canvas size.
     ///   - rotation: Rotation angle in degrees to apply to the renderered frame.
     public func render(
         frameIndex: Int,
