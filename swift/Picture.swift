@@ -4,6 +4,16 @@ import thorvg
 
 /// A Swift wrapper for ThorVG's Picture, facilitating picture manipulation.
 class Picture {
+    /// Supported MIME types for loading picture data.
+    enum MimeType: String {
+        case svg = "svg"
+        case lottie = "lottie"
+        case jpg = "jpg"
+        case jpeg = "jpeg"
+        case svgxml = "svg+xml"
+        case png = "png"
+    }
+
     /// Pointer to the underlying ThorVG picture object.
     let pointer: OpaquePointer
 
@@ -25,32 +35,52 @@ class Picture {
         }
     }
 
-    /// Loads a picture from a given string, typically containing SVG or Lottie data.
+    /// Loads a picture from a given data string.
     ///
-    /// Use the `mimeType` to indicate the data format to ThorVG for correct parsing and rendering.
-    func load(fromString string: String, mimeType: String) throws {
+    /// Use the `mimeType` to indicate the data format for correct parsing.
+    func load(fromString string: String, mimeType: MimeType) throws {
         guard let cString = string.cString(using: .utf8),
-              tvg_picture_load_data(pointer, cString, UInt32(cString.count), mimeType, false) == TVG_RESULT_SUCCESS
+              tvg_picture_load_data(pointer, cString, UInt32(cString.count), mimeType.rawValue, false) == TVG_RESULT_SUCCESS
         else {
             throw ThorVGError.failedToLoadFromString
         }
     }
 
+    /// Resizes the picture content to the given size.
+    func resize(_ size: CGSize) {
+        tvg_picture_set_size(pointer, Float(size.width), Float(size.height))
+    }
+
     /// Retrieves the size of the picture.
-    func getSize() -> CGSize {
+    private func getSize() -> CGSize {
         var width: Float = 0
         var height: Float = 0
         tvg_picture_get_size(pointer, &width, &height)
         return CGSize(width: Double(width), height: Double(height))
     }
 
-    /// Sets the size of the picture.
-    func setSize(_ size: CGSize) {
-        tvg_picture_set_size(pointer, Float(size.width), Float(size.height))
+    /// Applies a transformation matrix to the picture, with an optional anchor point for rotation and scaling.
+    ///
+    /// Note: the anchorPoint defaults to (0.5, 0.5), which is the center of the picture.
+    func apply(transform: CGAffineTransform, anchorPoint: CGPoint = CGPoint(x: 0.5, y: 0.5)) {
+        let size = getSize()
+
+        let pivotPoint = CGPoint(
+            x: size.width * anchorPoint.x,
+            y: size.height * anchorPoint.y
+        )
+
+        var transform = getTransform()
+        transform = transform
+            .translatedBy(x: pivotPoint.x, y: pivotPoint.y)
+            .concatenating(transform)
+            .translatedBy(x: -pivotPoint.x, y: -pivotPoint.y)
+
+        setTransform(transform)
     }
 
     /// Retrieves the current transform applied to the picture.
-    func getTransform() -> CGAffineTransform {
+    private func getTransform() -> CGAffineTransform {
         var matrix = Tvg_Matrix()
         tvg_paint_get_transform(pointer, &matrix)
 
@@ -61,7 +91,7 @@ class Picture {
     }
 
     /// Applies a new transform to the picture.
-    func setTransform(_ transform: CGAffineTransform) {
+    private func setTransform(_ transform: CGAffineTransform) {
         var matrix = Tvg_Matrix(
             e11: Float(transform.a), e12: Float(transform.c), e13: Float(transform.tx),
             e21: Float(transform.b), e22: Float(transform.d), e23: Float(transform.ty),
@@ -71,30 +101,12 @@ class Picture {
         tvg_paint_set_transform(pointer, &matrix)
     }
 
-    /// Rotates the picture about its center point.
-    ///
-    /// Note: We need to set the transform manually here because ThorVG's
-    /// default transformation behaviour rotates about the origin (not the center)
-    /// which is by default, the top-left of the picture.
-    func rotateAboutCenter(_ degrees: Double) {
-        let size = getSize()
-        let cx = size.width / 2
-        let cy = size.height / 2
-
-        let radians = degrees * .pi / 180.0
-
-        var transform = getTransform()
-        transform = transform
-            .translatedBy(x: cx, y: cy)
-            .rotated(by: radians)
-            .translatedBy(x: -cx, y: -cy)
-        setTransform(transform)
-    }
-
     /// Crops the picture to a specified rectangle, maintaining its perceived size.
     ///
     /// Note: We "crop" the picture by scaling it relative to it's original size.
     /// This means that we maintain the same perceived size of the picture before and after cropping.
+    ///
+    /// This behaviour is akin to a "stretch-to-fit" resizing, as the aspect ratio is not preserved.
     func crop(_ crop: CGRect) {
         // Get rid of the unneeded content.
         let cropShape = tvg_shape_new()
@@ -117,14 +129,11 @@ class Picture {
         // Scale the size of the picture relative to that ratio.
         let width = size.width * xRatio
         let height = size.height * yRatio
-        setSize(CGSize(width: width, height: height))
+        resize(CGSize(width: width, height: height))
 
         // Translate the picture back to the origin of the crop rectangle after scaling.
         let x = crop.minX * xRatio
         let y = crop.minY * yRatio
-
-        var transform = getTransform()
-        transform = transform.translatedBy(x: -x, y: -y)
-        setTransform(transform)
+        apply(transform: CGAffineTransform(translationX: -x, y: -y))
     }
 }

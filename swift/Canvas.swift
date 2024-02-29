@@ -46,8 +46,7 @@ class Canvas {
         tvg_canvas_sync(pointer)
     }
 
-    /// Destroys the canvas and deallocates the associated resources.
-    func destroy() {
+    deinit {
         tvg_canvas_destroy(pointer)
     }
 }
