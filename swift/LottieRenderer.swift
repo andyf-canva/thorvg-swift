@@ -52,10 +52,10 @@ public class LottieRenderer {
         let picture = lottie.animation.getPicture()
         picture.resize(canvas.size)
         picture.resetTransform()
-        picture.stretchToFit(contentRect)
 
         let radians = rotation * .pi / 180.0
         picture.apply(transform: CGAffineTransform(rotationAngle: radians))
+        picture.stretchToFit(contentRect)
 
         canvas.clear()
         canvas.update(picture: picture)
