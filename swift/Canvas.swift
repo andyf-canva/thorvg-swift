@@ -10,9 +10,6 @@ class Canvas {
     /// The size of the canvas.
     let size: CGSize
 
-    /// A flag indicating whether the canvas is empty.
-    var isEmpty: Bool = true
-
     /// Initializes a canvas with a specific size, buffer, and stride for drawing.
     init(size: CGSize, buffer: Buffer, stride: Int) {
         self.pointer = tvg_swcanvas_create()
@@ -22,9 +19,8 @@ class Canvas {
     }
 
     /// Pushes a picture onto the the canvas.
-    func push(picture: Picture) throws {
+    func push(picture: Picture) {
         tvg_canvas_push(pointer, picture.pointer)
-        self.isEmpty = false
     }
 
     /// Updates the properties of a picture that has already been pushed onto the canvas.

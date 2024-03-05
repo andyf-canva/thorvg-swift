@@ -28,6 +28,9 @@ public class LottieRenderer {
         self.lottie = lottie
         self.engine = engine
         self.canvas = Canvas(size: size, buffer: buffer, stride: stride)
+
+        let picture = lottie.animation.getPicture()
+        canvas.push(picture: picture)
     }
 
     /// Renders a specific frame of the Lottie animation using a specified area of the content, applying optional rotation.
@@ -53,10 +56,6 @@ public class LottieRenderer {
 
         let radians = rotation * .pi / 180.0
         picture.apply(transform: CGAffineTransform(rotationAngle: radians))
-
-        if canvas.isEmpty {
-            try canvas.push(picture: picture)
-        }
 
         canvas.clear()
         canvas.update(picture: picture)

@@ -5,13 +5,17 @@ import SnapshotTesting
 @testable import thorvg_swift
 
 class LottieSnapshotTests: XCTestCase {
-    let lottie: Lottie = {
-        let url = Bundle.module.url(forResource: "test", withExtension: "json")!
-        return try! Lottie(path: url.path)
-    }()
 
     let size = CGSize(width: 1024, height: 1024)
     let contentRect = CGRect(x: 0, y: 0, width: 1024, height: 1024)
+
+    var lottie: Lottie!
+
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        let url = Bundle.module.url(forResource: "test", withExtension: "json")!
+        lottie = try Lottie(path: url.path)
+    }
 
     func testRenderFrame_WhenValidBufferAndSize_ReturnsCorrectImageSnapshot() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
