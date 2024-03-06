@@ -118,8 +118,8 @@ class Picture {
         apply(transform: CGAffineTransform(scaleX: xRatio, y: yRatio), anchorPoint: CGPoint(x: 0, y: 0))
 
         // Translate the picture to the coordinates of the content rectangle.
-        let x = rect.origin.x * xRatio
-        let y = rect.origin.y * yRatio
+        let x = rect.minX * xRatio
+        let y = rect.minY * yRatio
         apply(transform: CGAffineTransform(translationX: -x, y: -y))
     }
 }
