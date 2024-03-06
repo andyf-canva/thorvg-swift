@@ -30,6 +30,7 @@ public class LottieRenderer {
         self.canvas = Canvas(size: size, buffer: buffer, stride: stride)
 
         let picture = lottie.animation.getPicture()
+        picture.resize(canvas.size)
         canvas.push(picture: picture)
     }
 
@@ -50,15 +51,49 @@ public class LottieRenderer {
         lottie.animation.setFrame(frameIndex)
 
         let picture = lottie.animation.getPicture()
-        picture.resize(canvas.size)
-        picture.resetTransform()
-        picture.stretchToFit(contentRect)
+        let size = picture.getSize()
 
-        let radians = rotation * .pi / 180.0
-        picture.apply(transform: CGAffineTransform(rotationAngle: radians))
+        // Create the transform for the Picture by multiplying three transform matrices.
+        // 1. Translate the Picture to the content rect origin.
+        // 2. Scale the Picture based on the Picture's size versus the content rect size.
+        // 3. Rotate the Picture about its center.
+        let transform =
+            CGAffineTransform(
+                translationX: -contentRect.minX,
+                y: -contentRect.minY
+            )
+            .concatenating(
+                CGAffineTransform(
+                    scaleX: size.width / contentRect.width,
+                    y: size.height / contentRect.height
+                )
+            )
+            .concatenating(
+                CGAffineTransform(
+                    rotationAngle: rotation * .pi / 180.0
+                )
+                .about(pivotPoint:
+                    CGPoint(
+                        x: size.width / 2,
+                        y: size.height / 2
+                    )
+                )
+            )
+        
+        picture.setTransform(transform)
 
         canvas.clear()
         canvas.update(picture: picture)
         try canvas.draw()
     }
 }
+
+extension CGAffineTransform {
+    /// Applies the transformation about a specified pivot point.
+    func about(pivotPoint: CGPoint) -> CGAffineTransform {
+        CGAffineTransform(translationX: -pivotPoint.x, y: -pivotPoint.y)
+            .concatenating(self)
+            .concatenating(CGAffineTransform(translationX: pivotPoint.x, y: pivotPoint.y))
+    }
+}
+
