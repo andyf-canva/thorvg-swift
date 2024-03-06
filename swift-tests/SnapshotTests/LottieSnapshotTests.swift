@@ -111,6 +111,22 @@ class LottieSnapshotTests: XCTestCase {
         assertSnapshot(matching: image, as: .image)
     }
 
+    func testRenderFrame_WhenCenterCroppedAndRotated_ReturnsCroppedScaledAndRotatedImageSnapshot() throws {
+        var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width))
+
+        let crop = CGRect(x: 384, y: 384, width: 256, height: 256)
+
+        try renderer.render(frameIndex: 0, contentRect: crop, rotation: 90)
+
+        guard let image = UIImage(buffer: &buffer, size: size) else {
+            XCTFail("Unable to create UIImage from buffer")
+            return
+        }
+
+        assertSnapshot(matching: image, as: .image)
+    }
+
     func testRenderFrame_WhenRotated_ReturnsRotatedImageSnapshot() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
         let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width))

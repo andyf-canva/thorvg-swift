@@ -113,15 +113,13 @@ class Picture {
         let size = getSize()
         let xRatio = size.width / rect.width
         let yRatio = size.height / rect.height
-
+        
         // Scale the size of the picture relative to that ratio.
-        let width = size.width * xRatio
-        let height = size.height * yRatio
-        resize(CGSize(width: width, height: height))
+        apply(transform: CGAffineTransform(scaleX: xRatio, y: yRatio), anchorPoint: CGPoint(x: 0, y: 0))
 
-        // Translate the picture to the origin of the rectangle after scaling.
-        let x = rect.minX * xRatio
-        let y = rect.minY * yRatio
+        // Translate the picture to the coordinates of the content rectangle.
+        let x = rect.origin.x * xRatio
+        let y = rect.origin.y * yRatio
         apply(transform: CGAffineTransform(translationX: -x, y: -y))
     }
 }
