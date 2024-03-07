@@ -52,50 +52,15 @@ class Picture {
     }
 
     /// Retrieves the size of the picture.
-    private func getSize() -> CGSize {
+    func getSize() -> CGSize {
         var width: Float = 0
         var height: Float = 0
         tvg_picture_get_size(pointer, &width, &height)
         return CGSize(width: Double(width), height: Double(height))
     }
 
-    /// Applies a transformation matrix to the picture, with an optional anchor point for rotation and scaling.
-    ///
-    /// Note: the anchorPoint defaults to (0.5, 0.5), which is the center of the picture.
-    func apply(transform: CGAffineTransform, anchorPoint: CGPoint = CGPoint(x: 0.5, y: 0.5)) {
-        let size = getSize()
-
-        let pivotPoint = CGPoint(
-            x: size.width * anchorPoint.x,
-            y: size.height * anchorPoint.y
-        )
-
-        let transform = getTransform()
-            .concatenating(CGAffineTransform(translationX: -pivotPoint.x, y: -pivotPoint.y))
-            .concatenating(transform)
-            .concatenating(CGAffineTransform(translationX: pivotPoint.x, y: pivotPoint.y))
-
-        setTransform(transform)
-    }
-
-    /// Resets the picture's transform matrix to the identity.
-    func resetTransform() {
-        setTransform(.identity)
-    }
-
-    /// Retrieves the current transform applied to the picture.
-    private func getTransform() -> CGAffineTransform {
-        var matrix = Tvg_Matrix()
-        tvg_paint_get_transform(pointer, &matrix)
-
-        return CGAffineTransform(
-            CGFloat(matrix.e11), CGFloat(matrix.e21), CGFloat(matrix.e12),
-            CGFloat(matrix.e22), CGFloat(matrix.e13), CGFloat(matrix.e23)
-        )
-    }
-
-    /// Applies a new transform to the picture.
-    private func setTransform(_ transform: CGAffineTransform) {
+    /// Sets the transformation matrix of the picture.
+    func setTransform(_ transform: CGAffineTransform) {
         var matrix = Tvg_Matrix(
             e11: Float(transform.a), e12: Float(transform.c), e13: Float(transform.tx),
             e21: Float(transform.b), e22: Float(transform.d), e23: Float(transform.ty),
@@ -103,25 +68,5 @@ class Picture {
         )
 
         tvg_paint_set_transform(pointer, &matrix)
-    }
-
-    /// Stretches the picture to a fit inside a specified rectangle.
-    ///
-    /// This behaviour is akin to a "stretch-to-fit" resizing as the picture's original aspect ratio is not preserved.
-    func stretchToFit(_ rect: CGRect) {
-        // Calculate the scale ratio of the picture size versus the rectangle.
-        let size = getSize()
-        let xRatio = size.width / rect.width
-        let yRatio = size.height / rect.height
-
-        // Scale the size of the picture relative to that ratio.
-        let width = size.width * xRatio
-        let height = size.height * yRatio
-        resize(CGSize(width: width, height: height))
-
-        // Translate the picture to the origin of the rectangle after scaling.
-        let x = rect.minX * xRatio
-        let y = rect.minY * yRatio
-        apply(transform: CGAffineTransform(translationX: -x, y: -y))
     }
 }
