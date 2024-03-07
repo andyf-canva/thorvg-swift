@@ -72,7 +72,7 @@ public class LottieRenderer {
                 CGAffineTransform(
                     rotationAngle: rotation * .pi / 180.0
                 )
-                .about(pivotPoint:
+                .appliedAround(pivot:
                     CGPoint(
                         x: size.width / 2,
                         y: size.height / 2
@@ -89,11 +89,11 @@ public class LottieRenderer {
 }
 
 extension CGAffineTransform {
-    /// Applies the transformation about a specified pivot point.
-    func about(pivotPoint: CGPoint) -> CGAffineTransform {
-        CGAffineTransform(translationX: -pivotPoint.x, y: -pivotPoint.y)
+    /// Applies the transformation around a specified pivot point.
+    func appliedAround(pivot: CGPoint) -> CGAffineTransform {
+        CGAffineTransform(translationX: -pivot.x, y: -pivot.y)
             .concatenating(self)
-            .concatenating(CGAffineTransform(translationX: pivotPoint.x, y: pivotPoint.y))
+            .concatenating(CGAffineTransform(translationX: pivot.x, y: pivot.y))
     }
 }
 
