@@ -230,10 +230,6 @@ extension Colorspace {
             return [.byteOrder32Little, CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)]
         case .abgr:
             return [.byteOrder32Big, CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)]
-        case .argbs:
-            return [] // TODO: Figure out what to do here.
-        case .abgrs:
-            return [] // TODO: Figure out what to here.
         }
     }
 }

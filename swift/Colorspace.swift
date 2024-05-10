@@ -6,10 +6,6 @@ public enum Colorspace {
     case abgr
     /// The channels are joined in the order: alpha, red, green, blue. Colors are alpha-premultiplied. (a << 24 | r << 16 | g << 8 | b)
     case argb
-    /// The channels are joined in the order: alpha, blue, green, red. Colors are un-alpha-premultiplied.
-    case abgrs
-    /// The channels are joined in the order: alpha, red, green, blue. Colors are un-alpha-premultiplied.
-    case argbs
 }
 
 extension Colorspace {
@@ -20,10 +16,6 @@ extension Colorspace {
             return TVG_COLORSPACE_ABGR8888
         case .argb:
             return TVG_COLORSPACE_ARGB8888
-        case .abgrs:
-            return TVG_COLORSPACE_ABGR8888S
-        case .argbs:
-            return TVG_COLORSPACE_ARGB8888S
         }
     }
 }
