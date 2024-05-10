@@ -223,14 +223,6 @@ extension UIImage {
 }
 
 extension Colorspace {
-    /* Note: Despite the unconventional bitmap configuration settings, the resulting snapshots produce correctly rendered Lottie frames. 
-
-     Typically, ARGB should use a big endian format since the red value follows the alpha at the smallest memory address.
-     Conversely, ABGR should utilize a little endian format with `premultipliedFirst` due to blue being the first color channel following alpha.
-
-     However, results from the snapshots indicate correct visual output, suggesting a potential anomaly in iOS’s handling of memory format.
-     Verification confirms that ThorVG is outputting buffers in the correct ARGB/ABGR format, pointing to an iOS-specific issue in interpreting these formats.
-     */
     var bitmapInfo: CGBitmapInfo {
         switch self {
         case .argb:
