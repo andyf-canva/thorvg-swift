@@ -18,7 +18,7 @@ public class LottieRenderer {
     ///   - size: The size of the rendering canvas. This size determines the final size of the rendered Lottie content.
     ///   - buffer: A buffer to hold the rendered pixel data.
     ///   - stride: The number of bytes in a row of the buffer.
-    ///   - colorspace: The color space defining the format of the pixel data.
+    ///   - colorspace: The color space defining the order of the color values for each pixel value.
     public init(
         _ lottie: Lottie,
         engine: Engine = .default,
