@@ -197,7 +197,7 @@ class LottieSnapshotTests: XCTestCase {
 
 extension UIImage {
     convenience init?(buffer: Buffer, size: CGSize, pixelFormat: PixelFormat) {
-        let colorspace = CGColorSpaceCreateDeviceRGB()
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bitmapInfo = pixelFormat.bitmapInfo.rawValue
         let bitsPerComponent = 8
         let bytesPerRow = Int(size.width) * 4
@@ -208,7 +208,7 @@ extension UIImage {
             height: Int(size.height),
             bitsPerComponent: bitsPerComponent,
             bytesPerRow: bytesPerRow,
-            space: colorspace,
+            space: colorSpace,
             bitmapInfo: bitmapInfo
         ) else {
             return nil
