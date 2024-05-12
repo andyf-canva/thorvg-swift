@@ -8,7 +8,7 @@ class LottieSnapshotTests: XCTestCase {
 
     let size = CGSize(width: 1024, height: 1024)
     let contentRect = CGRect(x: 0, y: 0, width: 1024, height: 1024)
-    let colorspace = Colorspace.argb
+    let pixelFormat = PixelFormat.argb
 
     var lottie: Lottie!
 
@@ -20,11 +20,11 @@ class LottieSnapshotTests: XCTestCase {
 
     func testRenderFrame_WhenValidBufferAndSize_ReturnsCorrectImageSnapshot() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), colorspace: colorspace)
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         try renderer.render(frameIndex: 0, contentRect: contentRect)
 
-        guard let image = UIImage(buffer: &buffer, size: size, colorspace: colorspace) else {
+        guard let image = UIImage(buffer: &buffer, size: size, pixelFormat: pixelFormat) else {
             XCTFail("Unable to create UIImage from buffer")
             return
         }
@@ -36,11 +36,11 @@ class LottieSnapshotTests: XCTestCase {
         let size = CGSize(width: 2048, height: 2048)
         let contentRect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), colorspace: colorspace)
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         try renderer.render(frameIndex: 0, contentRect: contentRect)
 
-        guard let image = UIImage(buffer: &buffer, size: size, colorspace: colorspace) else {
+        guard let image = UIImage(buffer: &buffer, size: size, pixelFormat: pixelFormat) else {
             XCTFail("Unable to create UIImage from buffer")
             return
         }
@@ -52,11 +52,11 @@ class LottieSnapshotTests: XCTestCase {
         let size = CGSize(width: 512, height: 512)
         let contentRect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), colorspace: colorspace)
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         try renderer.render(frameIndex: 0, contentRect: contentRect)
 
-        guard let image = UIImage(buffer: &buffer, size: size, colorspace: colorspace) else {
+        guard let image = UIImage(buffer: &buffer, size: size, pixelFormat: pixelFormat) else {
             XCTFail("Unable to create UIImage from buffer")
             return
         }
@@ -66,13 +66,13 @@ class LottieSnapshotTests: XCTestCase {
 
     func testRenderFrame_WhenCropped_ReturnsCroppedAndScaledImageSnapshot() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), colorspace: colorspace)
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         let crop = CGRect(x: 0, y: 0, width: 512, height: 512)
 
         try renderer.render(frameIndex: 0, contentRect: crop)
 
-        guard let image = UIImage(buffer: &buffer, size: size, colorspace: colorspace) else {
+        guard let image = UIImage(buffer: &buffer, size: size, pixelFormat: pixelFormat) else {
             XCTFail("Unable to create UIImage from buffer")
             return
         }
@@ -82,13 +82,13 @@ class LottieSnapshotTests: XCTestCase {
 
     func testRenderFrame_WhenCroppedWithNonUniformRectangle_ReturnsCroppedAndScaledImageSnapshot() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), colorspace: colorspace)
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         let crop = CGRect(x: 0, y: 0, width: 750, height: 1000)
 
         try renderer.render(frameIndex: 0, contentRect: crop)
 
-        guard let image = UIImage(buffer: &buffer, size: size, colorspace: colorspace) else {
+        guard let image = UIImage(buffer: &buffer, size: size, pixelFormat: pixelFormat) else {
             XCTFail("Unable to create UIImage from buffer")
             return
         }
@@ -98,13 +98,13 @@ class LottieSnapshotTests: XCTestCase {
 
     func testRenderFrame_WhenCenterCropped_ReturnsCroppedAndScaledImageSnapshot() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), colorspace: colorspace)
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         let crop = CGRect(x: 384, y: 384, width: 256, height: 256)
 
         try renderer.render(frameIndex: 0, contentRect: crop)
 
-        guard let image = UIImage(buffer: &buffer, size: size, colorspace: colorspace) else {
+        guard let image = UIImage(buffer: &buffer, size: size, pixelFormat: pixelFormat) else {
             XCTFail("Unable to create UIImage from buffer")
             return
         }
@@ -114,13 +114,13 @@ class LottieSnapshotTests: XCTestCase {
 
     func testRenderFrame_WhenCenterCroppedAndRotated_ReturnsCroppedScaledAndRotatedImageSnapshot() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), colorspace: colorspace)
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         let crop = CGRect(x: 384, y: 384, width: 256, height: 256)
 
         try renderer.render(frameIndex: 0, contentRect: crop, rotation: 90)
 
-        guard let image = UIImage(buffer: &buffer, size: size, colorspace: colorspace) else {
+        guard let image = UIImage(buffer: &buffer, size: size, pixelFormat: pixelFormat) else {
             XCTFail("Unable to create UIImage from buffer")
             return
         }
@@ -130,13 +130,13 @@ class LottieSnapshotTests: XCTestCase {
 
     func testRenderFrame_WhenRotated_ReturnsRotatedImageSnapshot() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), colorspace: colorspace)
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         let rotation = 90.0
 
         try renderer.render(frameIndex: 0, contentRect: contentRect, rotation: rotation)
 
-        guard let image = UIImage(buffer: &buffer, size: size, colorspace: colorspace) else {
+        guard let image = UIImage(buffer: &buffer, size: size, pixelFormat: pixelFormat) else {
             XCTFail("Unable to create UIImage from buffer")
             return
         }
@@ -146,14 +146,14 @@ class LottieSnapshotTests: XCTestCase {
 
     func testRenderFrame_WhenCroppedAndRotated_ReturnsCroppedAndRotatedImageSnapshot() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), colorspace: colorspace)
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         let crop = CGRect(x: 0, y: 0, width: 512, height: 512)
         let rotation = 90.0
 
         try renderer.render(frameIndex: 0, contentRect: crop, rotation: rotation)
 
-        guard let image = UIImage(buffer: &buffer, size: size, colorspace: colorspace) else {
+        guard let image = UIImage(buffer: &buffer, size: size, pixelFormat: pixelFormat) else {
             XCTFail("Unable to create UIImage from buffer")
             return
         }
@@ -167,11 +167,11 @@ class LottieSnapshotTests: XCTestCase {
         let rotation = 90.0
 
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), colorspace: colorspace)
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         try renderer.render(frameIndex: 0, contentRect: crop, rotation: rotation)
 
-        guard let image = UIImage(buffer: &buffer, size: size, colorspace: colorspace) else {
+        guard let image = UIImage(buffer: &buffer, size: size, pixelFormat: pixelFormat) else {
             XCTFail("Unable to create UIImage from buffer")
             return
         }
@@ -179,14 +179,14 @@ class LottieSnapshotTests: XCTestCase {
         assertSnapshot(matching: image, as: .image)
     }
 
-    func testRenderFrame_WhenUsingABGRColorspace_ReturnsImageWithCorrectPixelValues() throws {
-        let colorspace = Colorspace.abgr
+    func testRenderFrame_WhenUsingABGRPixelFormat_ReturnsImageWithCorrectPixelValues() throws {
+        let pixelFormat = PixelFormat.abgr
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), colorspace: colorspace)
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         try renderer.render(frameIndex: 0, contentRect: contentRect)
 
-        guard let image = UIImage(buffer: &buffer, size: size, colorspace: colorspace) else {
+        guard let image = UIImage(buffer: &buffer, size: size, pixelFormat: pixelFormat) else {
             XCTFail("Unable to create UIImage from buffer")
             return
         }
@@ -196,9 +196,9 @@ class LottieSnapshotTests: XCTestCase {
 }
 
 extension UIImage {
-    convenience init?(buffer: Buffer, size: CGSize, colorspace: Colorspace) {
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo = colorspace.bitmapInfo.rawValue
+    convenience init?(buffer: Buffer, size: CGSize, pixelFormat: PixelFormat) {
+        let colorspace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = pixelFormat.bitmapInfo.rawValue
         let bitsPerComponent = 8
         let bytesPerRow = Int(size.width) * 4
 
@@ -208,7 +208,7 @@ extension UIImage {
             height: Int(size.height),
             bitsPerComponent: bitsPerComponent,
             bytesPerRow: bytesPerRow,
-            space: colorSpace,
+            space: colorspace,
             bitmapInfo: bitmapInfo
         ) else {
             return nil
@@ -222,7 +222,7 @@ extension UIImage {
     }
 }
 
-extension Colorspace {
+extension PixelFormat {
     var bitmapInfo: CGBitmapInfo {
         switch self {
         case .argb:

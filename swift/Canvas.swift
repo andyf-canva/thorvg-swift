@@ -10,12 +10,12 @@ class Canvas {
     /// The size of the canvas.
     let size: CGSize
 
-    /// Initializes a canvas with a specific size, buffer, stride and colorspace for drawing.
-    init(size: CGSize, buffer: Buffer, stride: Int, colorspace: Colorspace) {
+    /// Initializes a canvas with a specific size, buffer, stride and pixel format for drawing.
+    init(size: CGSize, buffer: Buffer, stride: Int, pixelFormat: PixelFormat) {
         self.pointer = tvg_swcanvas_create()
         self.size = size
 
-        tvg_swcanvas_set_target(pointer, buffer, UInt32(stride), UInt32(size.width), UInt32(size.height), colorspace.tvgColorspace)
+        tvg_swcanvas_set_target(pointer, buffer, UInt32(stride), UInt32(size.width), UInt32(size.height), pixelFormat.colorspace)
     }
 
     /// Pushes a picture onto the the canvas.
