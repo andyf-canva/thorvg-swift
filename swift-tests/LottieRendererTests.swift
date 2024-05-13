@@ -7,6 +7,7 @@ final class LottieRendererTests: XCTestCase {
 
     let size = CGSize(width: 1024, height: 1024)
     let contentRect = CGRect(x: 0, y: 0, width: 1024, height: 1024)
+    let pixelFormat = PixelFormat.argb
 
     var lottie: Lottie!
 
@@ -18,7 +19,7 @@ final class LottieRendererTests: XCTestCase {
 
     func testRender_WithValidFrameIndex_BufferPopulatedWithContent() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width))
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         try renderer.render(frameIndex: 0, contentRect: contentRect)
 
@@ -28,7 +29,7 @@ final class LottieRendererTests: XCTestCase {
 
     func testRender_WithAllFrames_Succeeds() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width))
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         do {
             for index in 0 ..< lottie.numberOfFrames {
@@ -41,7 +42,7 @@ final class LottieRendererTests: XCTestCase {
 
     func testRenderFrame_WithFrameIndexBelowBounds_ThrowsError() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width))
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         do {
             try renderer.render(frameIndex: -1, contentRect: contentRect)
@@ -54,7 +55,7 @@ final class LottieRendererTests: XCTestCase {
 
     func testRenderFrame_WithFrameIndexAboveBounds_ThrowsError() throws {
         var buffer = [UInt32](repeating: 0, count: Int(size.width * size.height))
-        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width))
+        let renderer = LottieRenderer(lottie, size: size, buffer: &buffer, stride: Int(size.width), pixelFormat: pixelFormat)
 
         do {
             try renderer.render(frameIndex: 180, contentRect: contentRect)

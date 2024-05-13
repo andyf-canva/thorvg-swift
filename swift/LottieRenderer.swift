@@ -18,16 +18,18 @@ public class LottieRenderer {
     ///   - size: The size of the rendering canvas. This size determines the final size of the rendered Lottie content.
     ///   - buffer: A buffer to hold the rendered pixel data.
     ///   - stride: The number of bytes in a row of the buffer.
+    ///   - pixelFormat: The pixel format defining the format of the color components for each pixel value.
     public init(
         _ lottie: Lottie,
         engine: Engine = .default,
         size: CGSize,
         buffer: Buffer,
-        stride: Int
+        stride: Int,
+        pixelFormat: PixelFormat
     ) {
         self.lottie = lottie
         self.engine = engine
-        self.canvas = Canvas(size: size, buffer: buffer, stride: stride)
+        self.canvas = Canvas(size: size, buffer: buffer, stride: stride, pixelFormat: pixelFormat)
 
         let picture = lottie.animation.getPicture()
         picture.resize(canvas.size)
