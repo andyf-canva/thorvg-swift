@@ -10,6 +10,7 @@ This document outlines the Git usage policy for maintaining the integrity and ma
 
 - **Release Branches**: All releases must be created from branches that specifically contain the changes for that release. Each release branch should have its own tags corresponding to the release version to ensure that we can maintain and access previous versions of the package.
 - **No Tags on Main**: Given our strategy of forking and frequent rebasing from the upstream ThorVG repository, we will not create any tags or releases directly off the `main` branch. This approach ensures that `main` remains clean and continuously synchronized with the upstream without the clutter of release tags.
+- **How to Create a Release**: When creating a new release, cherry-pick all of the commits from `main` that sit on top of the upstream release tag into a new release branch. Then, as mentioned above, you are able to tag that branch with the release version and create a release out of it.
 
 ## Forking and Upstream Management
 
